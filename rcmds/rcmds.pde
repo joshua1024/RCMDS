@@ -6,8 +6,10 @@ boolean enabled=false;
 ////////////////////////add variables here
 
 void setup() {
-  size(1920, 1080);
+  size(350, 1300);
+    surface.setResizable(true);
   rcmdsSetup();
+  setupGamepad();
   //setup UI here
 }
 void draw() {
@@ -18,7 +20,7 @@ void draw() {
 
   String[] msg={"battery voltage", "ping"};
   String[] data={str(batVolt), str(wifiPing)};
-  dispTelem(msg, data, width/2, height*2/3, width/4, height*2/3, 20);
+  dispTelem(msg, data, width/2, height*7/8, width, height/4, 18);
 
   sendWifiData(true);
   endOfDraw();

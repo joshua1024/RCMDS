@@ -3,12 +3,18 @@ import org.gamecontrolplus.*;
 import net.java.games.input.*;
 ControlIO control;
 ControlDevice gpad;
-void setupGamepad(String device) {
+void setupGamepad() {
   gamepadAvail=true;
   try {
     control = ControlIO.getInstance(this);
-    println(control.getDevices());
-    gpad=control.getDevice(device);
+    println(control.devicesToText(""));
+    for (ControlDevice _gpad : control.getDevices()) {
+      if (_gpad.getTypeName()=="Gamepad") {
+        gpad=_gpad;
+        println(gpad.getName());
+        break;
+      }
+    }
     if (gpad == null) {
       gamepadAvail=false;
       return;
