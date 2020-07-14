@@ -3,6 +3,7 @@ Control App for [RCM](https://github.com/mpyoutube/rcm)
 
 Made with [Processing!](https://www.processing.org/reference)
 
+for Joshua's mini powerup robot
 
 ## UI element reference:
 ### Joystick
