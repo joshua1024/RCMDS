@@ -39,13 +39,13 @@ class Joystick {
     v=vectMult(v, new PVector(1/xRange, 1/yRange));
     noStroke();
     fill(background);
-    rect(xPos, yPos, size, size);
+    rect(xPos, yPos, size, size, stickSize*size/2);
     v=gamepadVect(xa, ya, v);
     v=keyboardCtrl.joystick(v, upKey, downKey, leftKey, rightKey);
     v=mousescreen.readPos(mouseID, v);
     v.set(constrain(v.x, -1, 1), constrain(v.y, -1, 1));
     fill(stick);
-    ellipse(xPos+size/2*v.x, yPos-size/2*v.y, stickSize*size, stickSize*size);
+    ellipse(xPos+(size/2-stickSize*size/2)*v.x, yPos-(size/2-stickSize*size/2)*v.y, stickSize*size, stickSize*size);
     v=vectMult(v, new PVector(xRange, yRange));
     return v;
   }

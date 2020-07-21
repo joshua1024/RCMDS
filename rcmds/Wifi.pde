@@ -1,8 +1,6 @@
 import hypermedia.net.*;
-int wifiPort=25210;
-String wifiIP="10.25.21.1";
 byte arrayToSend[]=new byte[255];
-byte wifiArrayCounter=0;
+int wifiArrayCounter=0;
 int arrayRecvd[]=new int [255];
 UDP udp;
 long wifiReceivedMillis=0;
@@ -37,9 +35,9 @@ void receive( byte[] data, String ip, int port ) {//wifi event handler
 }
 void sendBl(boolean d) {
   if (d) {
-    arrayToSend[wifiArrayCounter]=1;
+    arrayToSend[wifiArrayCounter]=byte(1);
   } else {
-    arrayToSend[wifiArrayCounter]=0;
+    arrayToSend[wifiArrayCounter]=byte(0);
   }
   wifiArrayCounter++;
 }
@@ -78,9 +76,9 @@ boolean recvBl() {
   wifiArrayCounter++;
   return d;
 }
-int recvBy() {
-  int d;
-  d=int(arrayRecvd[wifiArrayCounter]);
+byte recvBy() {
+  byte d;
+  d=byte(int(arrayRecvd[wifiArrayCounter]));
   wifiArrayCounter++;
   return d;
 }

@@ -14,6 +14,7 @@ class Button {
   int keyboard;
   String label;
   long millisWhenPressed;
+  boolean overridePress;
   Button(float _xPos, float _yPos, float _size, color _background, color _forground, String _gpButton, int _keyboard, boolean _momentary, boolean _val, String _label) {
     xPos=_xPos;
     yPos=_yPos;
@@ -30,6 +31,7 @@ class Button {
     wasPressed=false;
     millisWhenPressed=0;
     mouseID=mousescreen.registerZone(xPos, yPos, size, size);
+    overridePress=false;
   }
   boolean run() {
     wasPressed=pressed;
@@ -38,7 +40,9 @@ class Button {
       mousescreen.readPressed(mouseID)
       ||keyboardCtrl.isPressed(keyboard)
       ||gamepadButton(gpButton, false)
+      ||overridePress
       );
+    overridePress=false;
 
     if (momentary) {
       val=pressed;
@@ -73,6 +77,9 @@ class Button {
   }
   void setVal(boolean v) {
     val=v;
+  }
+  void press() {
+    overridePress=true;
   }
   boolean justReleased() {
     return !pressed&&wasPressed;

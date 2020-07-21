@@ -7,11 +7,10 @@ void setupGamepad() {
   gamepadAvail=true;
   try {
     control = ControlIO.getInstance(this);
-    println(control.devicesToText(""));
     for (ControlDevice _gpad : control.getDevices()) {
       if (_gpad.getTypeName()=="Gamepad") {
         gpad=_gpad;
-        println(gpad.getName());
+        gpad=control.getDevice(gpad.getName());
         break;
       }
     }
