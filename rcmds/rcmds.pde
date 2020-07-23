@@ -15,6 +15,8 @@ Button clawManualOpenButton;
 Slider manualArmSlider;
 Slider manualClawSlider;
 BatteryGraph batg;
+Button jogModeButton;
+Slider trimSlider;
 //////////////////////
 float batVolt=0.0;
 boolean enabled=false;
@@ -32,6 +34,8 @@ boolean clawManualClose=false;
 boolean clawManualOpen=false;
 float manualArm=1;
 float manualClaw=0;
+boolean jogMode=false;
+float trim=0;//////////////
 
 float upLidar=0;
 byte upLidarP=0;
@@ -44,6 +48,8 @@ byte backLidarP=0;
 boolean runningAutoIntakeRoutine=false;
 boolean ejectReady=false;
 boolean driveStopped=false;
+
+boolean clawButtoned=false;
 
 void setup() {
   size(350, 1300);
@@ -61,9 +67,11 @@ void setup() {
   autoEjectButton=new Button(width*.85, height*.28, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 3", 'r', false, false, "R auto eject");
   clawManualCloseButton=new Button(width*.2, height*.28, width*.2, color(0, 100, 100), color(0, 150, 150), null, 'z', true, false, "claw close");
   clawManualOpenButton=new Button(width*.5, height*.28, width*.2, color(100, 0, 100), color(150, 0, 150), null, 'x', true, false, "claw open");
-  manualClawSlider=new Slider(width*.5, height*.35, width*.9, width*.17, -1, 1, color(0, 30, 150), color(200), null, 0, 0, 0, 0, true, false);
+  manualClawSlider=new Slider(width*.5, height*.35, width*.9, width*.17, -1, 0, color(0, 30, 150), color(200), null, 0, 0, 0, 0, true, false);
   manualArmSlider=new Slider(width*.4, height*.16, height*.16, width*.1, -1, 1, color(100, 0, 0), color(200), "Z Axis", 0, 0, 0, 0, false, false);
   batg=new BatteryGraph(width*.5, height*.72, width*.95, height*.05, 5);
+  jogModeButton=new Button(width*.075, height*.1, width*.15, color(150), color(255, 100, 0), "Button 4", 'j', false, false, "jog drive");
+  trimSlider=new Slider(width*.7, height*.15, width*.4, width*.1, -1, 1, color(0, 100, 0), color(210, 190, 190), null, 'i', 'u', .001, 0, true, false);
 }
 void draw() {
   background(0);
@@ -76,7 +84,8 @@ void draw() {
   else autoManualButton.label="Q mech  manual";
   autoStop=autoStopButton.run();
   batg.run(batVolt);
-
+  jogMode=jogModeButton.run();
+  trim=trimSlider.run(trim);
   if (auto) {  
     autoEject=autoEjectButton.run();
     if (gamepadVal("X Rotation", 0)<-.2) {
@@ -97,24 +106,45 @@ void draw() {
     autoIntake=autoIntakeButton.run();
   } else {//manual
     manualArm=manualArmSlider.run(manualArm);
-    if (gamepadVal("X Rotation", 0)<-.2) {
+    if (gamepadVal("X Rotation", 0)<-.7) {
       clawManualCloseButton.press();
+      clawButtoned=true;
+    }
+    if (gamepadVal("X Rotation", 0)>.7) {
+      clawManualOpenButton.press();
+      clawButtoned=true;
     }
     if (clawManualCloseButton.run()) {
       manualClaw=-1;
     }
-    if (gamepadVal("X Rotation", 0)>.2) {
-      clawManualOpenButton.press();
-    }
     if (clawManualOpenButton.run()) {
       manualClaw=0;
     }
+    if (gamepadVal("X Rotation", 0)>.1) {
+      if (!clawButtoned) {
+        strokeWeight(4);
+        stroke(255, 100, 255);
+        rect(manualClawSlider.xPos, manualClawSlider.yPos, manualClawSlider.s, manualClawSlider.w);
+        manualClaw+=.05*(gamepadVal("X Rotation", 0)-.1);
+        noStroke();
+      }
+    } else  if (gamepadVal("X Rotation", 0)<-.1) {
+      if (!clawButtoned) {
+        strokeWeight(4);
+        stroke(255, 100, 255);
+        rect(manualClawSlider.xPos, manualClawSlider.yPos, manualClawSlider.s, manualClawSlider.w);
+        manualClaw+=.05*(gamepadVal("X Rotation", 0)+.1);
+        noStroke();
+      }
+    } else {
+      clawButtoned=false;
+    }
     manualClaw=manualClawSlider.run(manualClaw);
   }
-  clawIndicator(width*0.21, height*0.47, width*0.4, height*0.17, mouseX*1.0/width, byte(mouseX>100?1:0));
-  frontIndicator(width*0.540, height*0.427, width*0.23, height*0.08, mouseX*1.0/width, byte(mouseX>100?1:0));
-  backIndicator(width*0.540, height*0.518, width*0.23, height*0.08, mouseX*1.0/width, byte(mouseX>100?1:0));
-  upIndicator(width*0.82, height*0.472, width*0.32, height*0.17, byte(mouseX*4/width));
+  clawIndicator(width*0.21, height*0.47, width*0.4, height*0.17, clawLidar, clawLidarP);
+  frontIndicator(width*0.540, height*0.427, width*0.23, height*0.08, frontLidar, frontLidarP);
+  backIndicator(width*0.540, height*0.515, width*0.23, height*0.08, backLidar, backLidarP);
+  upIndicator(width*0.82, height*0.472, width*0.32, height*0.17, upLidarP);
 
   textSize(23);
   if (runningAutoIntakeRoutine) {
@@ -146,7 +176,6 @@ void draw() {
 void WifiDataToRecv() {
   batVolt=recvFl();
   ////////////////////////////////////add data to read here
-  runningAutoIntakeRoutine=recvBl();
   upLidar=recvFl();
   upLidarP=recvBy();
   clawLidar=recvFl();
@@ -171,10 +200,31 @@ void WifiDataToSend() {
   sendBl(loadingStationIntake);
   sendBl(eject);
   sendBl(autoIntake);
-  sendBl(clawManualClose);
-  sendBl(clawManualOpen);
   sendFl(manualArm);
   sendFl(manualClaw);
+  sendBl(jogMode);
+  sendFl(trim);//edit above
+  sendBy(byte(146));//upLidarP1
+  sendBy(byte(85));//upLidarP2
+  sendBy(byte(3));//upLidarP3
+  sendBy(byte(115));//frontLidarP1
+  sendBy(byte(98));//clawLidarP1
+  sendBy(byte(233));//backLidarP1
+  sendBy(byte(171));//upLidarMin
+  sendBy(byte(37));//upLidarMax
+  sendBy(byte(185));//clawLidarMin
+  sendBy(byte(0));//clawLidarMax
+  sendBy(byte(241));//frontLidarMin
+  sendBy(byte(105));//frontLidarMax
+  sendBy(byte(241));//backLidarMin
+  sendBy(byte(5));//backLidarMax
+  sendBy(byte(68));//leftClawCenter
+  sendBy(byte(106));//leftClawRange
+  sendBy(byte(127));//rightClawCenter
+  sendBy(byte(109));//rightClawRange
+  sendBy(byte(122));//armCenter
+  sendBy(byte(214));//armRange
+  sendBy(byte(227));
 }
 void clawIndicator(float x, float y, float w, float h, float val, byte valP) {
   pushStyle();

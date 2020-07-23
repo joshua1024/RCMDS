@@ -22,7 +22,7 @@ class BatteryGraph {
       }
       volts[volts.length-1]=volt;
     }
-
+    strokeWeight(1);
     fill(20);
     stroke(80);
     rect(x, y, w+9, h+10, 5);
