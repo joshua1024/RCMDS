@@ -48,8 +48,11 @@ byte backLidarP=0;
 boolean runningAutoIntakeRoutine=false;
 boolean ejectReady=false;
 boolean driveStopped=false;
+boolean armMoving=false;
+float clawPosRead=0;
 
 boolean clawButtoned=false;
+boolean lastAuto=false;
 
 void setup() {
   size(350, 1300);
@@ -86,6 +89,9 @@ void draw() {
   batg.run(batVolt);
   jogMode=jogModeButton.run();
   trim=trimSlider.run(trim);
+  if (!auto&&lastAuto) {
+    manualClaw=clawPosRead;
+  }
   if (auto) {  
     autoEject=autoEjectButton.run();
     if (gamepadVal("X Rotation", 0)<-.2) {
@@ -96,7 +102,7 @@ void draw() {
       ejectButton.press();
     }
     eject=ejectButton.run();
-    if (gamepadVal("Z Axis", 0)>.7&&!eject&&!loadingStationIntake) {
+    if (gamepadVal("Z Axis", 0)>.7&&!loadingStationIntake) {
       raiseArmToScoreButton.press();
     }
     raiseArmToScore=raiseArmToScoreButton.run();
@@ -142,9 +148,13 @@ void draw() {
     manualClaw=manualClawSlider.run(manualClaw);
   }
   clawIndicator(width*0.21, height*0.47, width*0.4, height*0.17, clawLidar, clawLidarP);
-  frontIndicator(width*0.540, height*0.427, width*0.23, height*0.08, frontLidar, frontLidarP);
+  if (frontLidarP!=100) {
+    frontIndicator(width*0.540, height*0.427, width*0.23, height*0.08, frontLidar, frontLidarP);
+  }
   backIndicator(width*0.540, height*0.515, width*0.23, height*0.08, backLidar, backLidarP);
-  upIndicator(width*0.82, height*0.472, width*0.32, height*0.17, upLidarP);
+  if (upLidarP!=100) {
+    upIndicator(width*0.82, height*0.472, width*0.32, height*0.17, upLidarP);
+  }
 
   textSize(23);
   if (runningAutoIntakeRoutine) {
@@ -165,11 +175,17 @@ void draw() {
     fill(0);
     text("eject ready", width*0.192+width*2/3, height*0.600, width/3, height*0.05);
   }
+  if (armMoving) {
+    fill(#999999);
+    rect(width/6+width*2/3, height*0.600+height*.05, width/3, height*0.05);
+    fill(0);
+    text("arm moving", width*0.192+width*2/3, height*0.6000+height*.05, width/3, height*0.05);
+  }
 
   String[] msg={"battery voltage", "ping", "claw lidar", "scale lidar", "front lidar", "back lidar"};
   String[] data={nf(batVolt, 1, 2), str(wifiPing), nf(clawLidar, 1, 2), nf(upLidar, 1, 2), nf(frontLidar, 1, 2), nf(backLidar, 1, 2)};
   dispTelem(msg, data, width/2, height*7/8, width, height/4, 15);
-
+  lastAuto=auto;
   sendWifiData(true);
   endOfDraw();
 }
@@ -187,6 +203,8 @@ void WifiDataToRecv() {
   runningAutoIntakeRoutine=recvBl();
   ejectReady=recvBl();
   driveStopped=recvBl();
+  armMoving=recvBl();
+  clawPosRead=recvFl();
 }
 void WifiDataToSend() {
   sendBl(enabled);
@@ -204,19 +222,19 @@ void WifiDataToSend() {
   sendFl(manualClaw);
   sendBl(jogMode);
   sendFl(trim);//edit above
-  sendBy(byte(146));//upLidarP1
+  sendBy(byte(148));//upLidarP1
   sendBy(byte(85));//upLidarP2
-  sendBy(byte(3));//upLidarP3
+  sendBy(byte(0));//upLidarP3
   sendBy(byte(115));//frontLidarP1
   sendBy(byte(98));//clawLidarP1
   sendBy(byte(233));//backLidarP1
   sendBy(byte(171));//upLidarMin
   sendBy(byte(37));//upLidarMax
-  sendBy(byte(185));//clawLidarMin
+  sendBy(byte(175));//clawLidarMin
   sendBy(byte(0));//clawLidarMax
-  sendBy(byte(241));//frontLidarMin
-  sendBy(byte(105));//frontLidarMax
-  sendBy(byte(241));//backLidarMin
+  sendBy(byte(218));//frontLidarMin
+  sendBy(byte(81));//frontLidarMax
+  sendBy(byte(182));//backLidarMin
   sendBy(byte(5));//backLidarMax
   sendBy(byte(68));//leftClawCenter
   sendBy(byte(106));//leftClawRange
@@ -224,7 +242,13 @@ void WifiDataToSend() {
   sendBy(byte(109));//rightClawRange
   sendBy(byte(122));//armCenter
   sendBy(byte(214));//armRange
-  sendBy(byte(227));
+  sendBy(byte(227));//mot power
+  sendBy(byte(45));//arm accel
+  sendBy(byte(45));//arm speed
+  sendBl(true);//smooth arm speed
+  sendBl(true);//drive smooth
+  sendBy(byte(41));//drive acc
+  sendBy(byte(200));//loading station auto drive time
 }
 void clawIndicator(float x, float y, float w, float h, float val, byte valP) {
   pushStyle();
