@@ -36,6 +36,7 @@ float manualArm=1;
 float manualClaw=0;
 boolean jogMode=false;
 float trim=0;//////////////
+boolean red=false;
 
 float upLidar=0;
 byte upLidarP=0;
@@ -50,6 +51,8 @@ boolean ejectReady=false;
 boolean driveStopped=false;
 boolean armMoving=false;
 float clawPosRead=0;
+boolean upTouch=false;
+boolean scaleEject=false;
 
 boolean clawButtoned=false;
 boolean lastAuto=false;
@@ -67,7 +70,7 @@ void setup() {
   autoIntakeButton=new Button(width*.35, height*.35, width*.2, color(0, 140, 140), color(0, 200, 200), null, 's', true, false, "auto claw");
   autoManualButton=new Button(width*.15, height*.16, width*.25, color(75, 75, 0), color(75, 0, 75), "Button 1", 'q', true, true, "Q mech manual");
   autoStopButton=new Button(width*.7, height*.2, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 0", 'e', true, false, "E auto stop");
-  autoEjectButton=new Button(width*.85, height*.28, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 3", 'r', false, false, "R auto eject");
+  autoEjectButton=new Button(width*.85, height*.28, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 3", 'r', false, true, "R auto eject");
   clawManualCloseButton=new Button(width*.2, height*.28, width*.2, color(0, 100, 100), color(0, 150, 150), null, 'z', true, false, "claw close");
   clawManualOpenButton=new Button(width*.5, height*.28, width*.2, color(100, 0, 100), color(150, 0, 150), null, 'x', true, false, "claw open");
   manualClawSlider=new Slider(width*.5, height*.35, width*.9, width*.17, -1, 0, color(0, 30, 150), color(200), null, 0, 0, 0, 0, true, false);
@@ -181,6 +184,26 @@ void draw() {
     fill(0);
     text("arm moving", width*0.192+width*2/3, height*0.6000+height*.05, width/3, height*0.05);
   }
+  if (scaleEject) {
+    fill(150, 0, 50);
+    rect(width/6+width*1/3, height*0.600+height*.05, width/3, height*0.05);
+    fill(0);
+    text("scale detected", width*0.192+width*1/3, height*0.6000+height*.05, width/3, height*0.05);
+  }
+  if (red) {
+    fill(#999999);
+    rect(width/6, height*0.600+height*.05, width/3, height*0.05);
+    fill(#FF0000);
+    text("; red", width*0.192, height*0.6000+height*.05, width/3, height*0.05);
+  } else {
+    fill(#999999);
+    rect(width/6, height*0.600+height*.05, width/3, height*0.05);
+    fill(#0000FF);
+    text("; blue", width*0.192, height*0.6000+height*.05, width/3, height*0.05);
+  }
+  if (keyboardCtrl.isPressed(';')&&frameCount%40==1) {
+    red=!red;
+  }
 
   String[] msg={"battery voltage", "ping", "claw lidar", "scale lidar", "front lidar", "back lidar"};
   String[] data={nf(batVolt, 1, 2), str(wifiPing), nf(clawLidar, 1, 2), nf(upLidar, 1, 2), nf(frontLidar, 1, 2), nf(backLidar, 1, 2)};
@@ -205,6 +228,8 @@ void WifiDataToRecv() {
   driveStopped=recvBl();
   armMoving=recvBl();
   clawPosRead=recvFl();
+  upTouch=recvBl();
+  scaleEject=recvBl();
 }
 void WifiDataToSend() {
   sendBl(enabled);
@@ -224,31 +249,38 @@ void WifiDataToSend() {
   sendFl(trim);//edit above
   sendBy(byte(148));//upLidarP1
   sendBy(byte(85));//upLidarP2
-  sendBy(byte(0));//upLidarP3
+  sendBy(byte(9));//upLidarP3
   sendBy(byte(115));//frontLidarP1
-  sendBy(byte(98));//clawLidarP1
-  sendBy(byte(233));//backLidarP1
-  sendBy(byte(171));//upLidarMin
-  sendBy(byte(37));//upLidarMax
-  sendBy(byte(175));//clawLidarMin
-  sendBy(byte(0));//clawLidarMax
-  sendBy(byte(218));//frontLidarMin
-  sendBy(byte(81));//frontLidarMax
+  sendBy(byte(19));//clawLidarP1
+  sendBy(byte(187));//backLidarP1
+  sendBy(byte(169));//upLidarMin
+  sendBy(byte(69));//upLidarMax
+  sendBy(byte(181));//clawLidarMin
+  sendBy(byte(50));//clawLidarMax
+  sendBy(byte(223));//frontLidarMin
+  sendBy(byte(170));//frontLidarMax
   sendBy(byte(182));//backLidarMin
   sendBy(byte(5));//backLidarMax
   sendBy(byte(68));//leftClawCenter
-  sendBy(byte(106));//leftClawRange
+  sendBy(byte(108));//leftClawRange
   sendBy(byte(127));//rightClawCenter
-  sendBy(byte(109));//rightClawRange
+  sendBy(byte(112));//rightClawRange
   sendBy(byte(122));//armCenter
   sendBy(byte(214));//armRange
   sendBy(byte(227));//mot power
-  sendBy(byte(45));//arm accel
-  sendBy(byte(45));//arm speed
+  sendBy(byte(197));//arm accel
+  sendBy(byte(210));//arm speed
   sendBl(true);//smooth arm speed
   sendBl(true);//drive smooth
-  sendBy(byte(41));//drive acc
-  sendBy(byte(200));//loading station auto drive time
+  sendBy(byte(5));//drive acc
+  sendBy(byte(86));//loading station auto drive time
+  sendBy(byte(76));//switch pos
+  sendBy(byte(218));//scale pos
+  sendBy(byte(255));//back switch pos
+  sendBy(byte(152));//hold pos
+  sendBy(byte(252));//jog time
+  sendBy(byte(59));//jog duty cycle
+  sendBl(red);
 }
 void clawIndicator(float x, float y, float w, float h, float val, byte valP) {
   pushStyle();
@@ -316,7 +348,10 @@ void upIndicator(float x, float y, float w, float h, byte valP) {
     stroke(0, 255, 0);
   } else {
     stroke(80);
-  }  
+  }
+  if (upTouch==true) {
+    stroke(255);
+  }
   noFill();
   strokeWeight(20);
   rect(x-w/2+10, y-h/2+10, w-20, h-20);

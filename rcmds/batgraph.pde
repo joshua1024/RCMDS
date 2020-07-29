@@ -37,7 +37,7 @@ class BatteryGraph {
       } else {
         stroke(200, 0, 0);
       }
-      line(x+i-w/2, y+h/2, x+i-w/2, y-h*(sqrt(norm(constrain(volts[int(map(i, 0, w, 0, volts.length))], 4, 7), 4, 7))-0.5));
+      line(x+i-w/2, y+h/2, x+i-w/2, y-h*(sqrt(norm(constrain(volts[int(map(i, 0, w, 0, volts.length))], 4.2, 7), 4.2, 7))-0.5));
     }
     noStroke();
   }
