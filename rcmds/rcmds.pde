@@ -1,3 +1,8 @@
+/*TODO:
+ 
+ 
+ */
+
 int wifiPort=25212;
 String wifiIP="10.0.0.19";
 /////////////////////////add interface elements here
@@ -69,8 +74,8 @@ void setup() {
   ejectButton=new Button(width*.57, height*.29, width*.2, color(150, 0, 50), color(200, 0, 100), null, 'd', true, false, "eject");
   autoIntakeButton=new Button(width*.35, height*.35, width*.2, color(0, 140, 140), color(0, 200, 200), null, 's', true, false, "auto claw");
   autoManualButton=new Button(width*.15, height*.16, width*.25, color(75, 75, 0), color(75, 0, 75), "Button 1", 'q', true, true, "Q mech manual");
-  autoStopButton=new Button(width*.7, height*.2, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 0", 'e', true, false, "E auto stop");
-  autoEjectButton=new Button(width*.85, height*.28, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 3", 'r', false, true, "R auto eject");
+  autoStopButton=new Button(width*.7, height*.2, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 3", 'e', false, false, "E auto stop");
+  autoEjectButton=new Button(width*.85, height*.28, width*.25, color(150, 0, 50), color(250, 0, 100), "Button 0", 'r', true, true, "R auto eject");
   clawManualCloseButton=new Button(width*.2, height*.28, width*.2, color(0, 100, 100), color(0, 150, 150), null, 'z', true, false, "claw close");
   clawManualOpenButton=new Button(width*.5, height*.28, width*.2, color(100, 0, 100), color(150, 0, 150), null, 'x', true, false, "claw open");
   manualClawSlider=new Slider(width*.5, height*.35, width*.9, width*.17, -1, 0, color(0, 30, 150), color(200), null, 0, 0, 0, 0, true, false);
@@ -255,7 +260,7 @@ void WifiDataToSend() {
   sendBy(byte(187));//backLidarP1
   sendBy(byte(169));//upLidarMin
   sendBy(byte(69));//upLidarMax
-  sendBy(byte(181));//clawLidarMin
+  sendBy(byte(123));//clawLidarMin
   sendBy(byte(50));//clawLidarMax
   sendBy(byte(223));//frontLidarMin
   sendBy(byte(170));//frontLidarMax
@@ -278,9 +283,10 @@ void WifiDataToSend() {
   sendBy(byte(218));//scale pos
   sendBy(byte(255));//back switch pos
   sendBy(byte(152));//hold pos
-  sendBy(byte(252));//jog time
-  sendBy(byte(59));//jog duty cycle
+  sendBy(byte(99));//jog time
+  sendBy(byte(11));//jog duty cycle
   sendBl(red);
+  sendBy(byte(250));//climb speed
 }
 void clawIndicator(float x, float y, float w, float h, float val, byte valP) {
   pushStyle();
