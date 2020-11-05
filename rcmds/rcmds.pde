@@ -8,6 +8,7 @@ String wifiIP="10.0.0.19";
 /////////////////////////add interface elements here
 Joystick moveStick;
 Button climbButton;
+Button reverseClimbButton;
 Button raiseArmToScoreButton;
 Button loadingStationIntakeButton;
 Button ejectButton;
@@ -28,6 +29,7 @@ boolean enabled=false;
 ////////////////////////add variables here
 PVector move=new PVector(0, 0);
 boolean climb=false;
+boolean reverseClimb=false;
 boolean raiseArmToScore=false;
 boolean loadingStationIntake=false;
 boolean eject=false;
@@ -69,6 +71,7 @@ void setup() {
   //setup UI here
   moveStick=new Joystick(width*.88, height*.1, width*.2, 1, 1, color(0, 40, 0), color(200), "X Axis", "Y Axis", UP, LEFT, DOWN, RIGHT, 0, 0);
   climbButton=new Button(width*.55, height*.1, width*.15, color(155, 0, 0), color(155, 155, 50), "Button 2", 'c', true, false, "Climb");
+  reverseClimbButton=new Button(width*.70, height*.1, width*.08, color(155, 0, 0), color(155, 155, 50), null, 0, true, false, "rev c");
   raiseArmToScoreButton=new Button(width*.35, height*.23, width*.2, color(0, 155, 0), color(0, 200, 0), null, 'w', true, false, "arm score");
   loadingStationIntakeButton=new Button(width*.13, height*.29, width*.2, color(0, 140, 140), color(0, 200, 200), null, 'a', true, false, "loading station");
   ejectButton=new Button(width*.57, height*.29, width*.2, color(150, 0, 50), color(200, 0, 100), null, 'd', true, false, "eject");
@@ -90,6 +93,11 @@ void draw() {
   /////////////////////////////////////add UI here
   move=moveStick.run(new PVector(0, 0));
   climb=climbButton.run();
+  if (!climb) {
+    reverseClimb=reverseClimbButton.run();
+  } else {
+    reverseClimb=false;
+  }
   auto=!autoManualButton.run();
   if (auto) autoManualButton.label="Q mech    auto";
   else autoManualButton.label="Q mech  manual";
@@ -244,6 +252,7 @@ void WifiDataToSend() {
   sendBl(autoEject);
   sendBl(autoStop);
   sendBl(climb);
+  sendBl(reverseClimb);
   sendBl(raiseArmToScore);
   sendBl(loadingStationIntake);
   sendBl(eject);
