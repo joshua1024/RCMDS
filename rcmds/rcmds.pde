@@ -4,7 +4,7 @@
  */
 
 int wifiPort=25212;
-String wifiIP="10.0.0.19";
+String wifiIP="50.78.178.6";//"10.0.0.19";//
 /////////////////////////add interface elements here
 Joystick moveStick;
 Button climbButton;
