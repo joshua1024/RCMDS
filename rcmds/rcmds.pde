@@ -281,7 +281,7 @@ void WifiDataToSend() {
   sendBy(byte(112));//rightClawRange
   sendBy(byte(122));//armCenter
   sendBy(byte(214));//armRange
-  sendBy(byte(227));//mot power
+  sendBy(byte(255));//mot power
   sendBy(byte(197));//arm accel
   sendBy(byte(210));//arm speed
   sendBl(true);//smooth arm speed
